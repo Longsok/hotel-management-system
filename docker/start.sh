@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env 
 set -o errexit
 
 php artisan config:clear || true
