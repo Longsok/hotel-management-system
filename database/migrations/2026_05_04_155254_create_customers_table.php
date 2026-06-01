@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('password')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('phone')->nullable();
-            $table->string('nationality')->default('')->change();
+            $table->string('nationality')->default('');
             $table->string('id_card')->nullable();
             $table->string('passport')->nullable();
             $table->text('address')->nullable();
@@ -33,8 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('customers', function (Blueprint $table) {
-            $table->string('nationality')->nullable(false)->change();
-        });
+         Schema::dropIfExists('customers');
     }
 };
