@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 set -o errexit
 
-# Run migrations against the live DB on boot
+# Clear any stale cache first
+php artisan config:clear
+php artisan cache:clear
+
+# Run migrations
 php artisan migrate --force
 
-# Start both services via supervisor
+# Now cache with real env vars present
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Start services
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
