@@ -176,14 +176,19 @@
     .features-grid { grid-template-columns:1fr 1fr; }
     .location-grid { grid-template-columns:1fr; }
     .step-arrow    { display:none; }
-    .search-bar    { gap:10px; }
-    .sf            { min-width:140px; flex:1 1 45%; }
-    .search-btn    { flex:1 1 100%; justify-content:center; }
+    /* Stack search bar vertically, full width */
+    .search-bar    { flex-direction:column; align-items:stretch; gap:12px; }
+    .sf            { min-width:0; width:100%; flex:none; }
+    .sf-input      { width:100%; }
+    .search-btn    { width:100%; justify-content:center; }
 }
 @media(max-width:600px) {
     .hero { padding:48px 16px 80px; }
     .hero-title { font-size:28px; }
-    .search-bar { flex-direction:column;padding:16px; }
+    .search-bar { flex-direction:column; align-items:stretch; padding:16px; gap:12px; }
+    .sf { width:100%; min-width:0; flex:none; }
+    .sf-input { width:100%; }
+    .search-btn { width:100%; justify-content:center; }
     .page-wrap { padding:0 16px; }
     .steps-grid { grid-template-columns:1fr; }
     .features-grid { grid-template-columns:1fr; }
@@ -202,7 +207,10 @@
 .reveal-stagger.visible > *:nth-child(4){transition-delay:.35s;}
 .reveal-stagger.visible > *:nth-child(5){transition-delay:.45s;}
 .reveal-stagger.visible > *:nth-child(6){transition-delay:.55s;}
-@media (prefers-reduced-motion: reduce){ .reveal,.reveal-stagger > *{opacity:1;transform:none;transition:none;} }
+/* Room cards animate in one-by-one when rendered */
+.room-card.anim-in { animation: cardRise .5s ease forwards; opacity:0; }
+@keyframes cardRise { from{opacity:0;transform:translateY(28px);} to{opacity:1;transform:translateY(0);} }
+@media (prefers-reduced-motion: reduce){ .reveal,.reveal-stagger > *{opacity:1;transform:none;transition:none;} .room-card.anim-in{animation:none;opacity:1;} }
 </style>
 @endpush
 
@@ -608,7 +616,7 @@ function loadRooms() {
 function renderRooms(rooms) {
     var grid = document.getElementById('rooms-grid');
     grid.innerHTML = '';
-    rooms.forEach(room => {
+    rooms.forEach((room, index) => {
         var deposit = calcDeposit(room.base_price, currentDates.nights);
         var card = document.createElement('div');
         card.className = 'room-card';
@@ -634,6 +642,9 @@ function renderRooms(rooms) {
                 </div>
             </div>`;
         card.addEventListener('click', () => openModal(room));
+        // Staggered entrance animation, one card after another
+        card.classList.add('anim-in');
+        card.style.animationDelay = (index * 0.08) + 's';
         grid.appendChild(card);
     });
 }
