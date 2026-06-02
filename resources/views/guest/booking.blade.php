@@ -176,6 +176,9 @@
     .features-grid { grid-template-columns:1fr 1fr; }
     .location-grid { grid-template-columns:1fr; }
     .step-arrow    { display:none; }
+    .search-bar    { gap:10px; }
+    .sf            { min-width:140px; flex:1 1 45%; }
+    .search-btn    { flex:1 1 100%; justify-content:center; }
 }
 @media(max-width:600px) {
     .hero { padding:48px 16px 80px; }
@@ -187,6 +190,19 @@
     .form-grid { grid-template-columns:1fr; }
     .form-full { grid-column:span 1; }
 }
+
+/* ── Scroll reveal animations ── */
+.reveal { opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease; }
+.reveal.visible { opacity:1;transform:translateY(0); }
+.reveal-stagger > * { opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease; }
+.reveal-stagger.visible > * { opacity:1;transform:translateY(0); }
+.reveal-stagger.visible > *:nth-child(1){transition-delay:.05s;}
+.reveal-stagger.visible > *:nth-child(2){transition-delay:.15s;}
+.reveal-stagger.visible > *:nth-child(3){transition-delay:.25s;}
+.reveal-stagger.visible > *:nth-child(4){transition-delay:.35s;}
+.reveal-stagger.visible > *:nth-child(5){transition-delay:.45s;}
+.reveal-stagger.visible > *:nth-child(6){transition-delay:.55s;}
+@media (prefers-reduced-motion: reduce){ .reveal,.reveal-stagger > *{opacity:1;transform:none;transition:none;} }
 </style>
 @endpush
 
@@ -221,12 +237,12 @@
 <div class="page-wrap">
 
     {{-- ── How it Works ── --}}
-    <div class="steps-section">
+    <div class="steps-section reveal">
         <div class="section-label">Simple & Fast</div>
         <div class="section-title">How to Book in 4 Easy Steps</div>
         <div class="section-sub">Reserve your room in minutes and pay only the deposit online.</div>
 
-        <div class="steps-grid">
+        <div class="steps-grid reveal-stagger">
             <div class="step-card">
                 <div class="step-num">1</div>
                 <i class="fas fa-user-plus step-icon"></i>
@@ -371,7 +387,7 @@
         <div class="section-label">Why Choose Us</div>
         <div class="section-title">Hotel Features</div>
         <div class="section-sub" style="margin-bottom:36px;">Everything you need for a comfortable stay</div>
-        <div class="features-grid">
+        <div class="features-grid reveal-stagger">
             <div class="feat-card">
                 <div class="feat-icon"><i class="fas fa-wifi"></i></div>
                 <div class="feat-title">Free High-Speed WiFi</div>
@@ -409,7 +425,7 @@
 {{-- ── Location ── --}}
 <div class="location-section">
     <div class="page-wrap">
-        <div class="location-grid">
+        <div class="location-grid reveal">
             <div>
                 <div class="section-label">Find Us</div>
                 <div class="section-title" style="text-align:left;">Our Location</div>
@@ -542,7 +558,13 @@ document.getElementById('check_in').addEventListener('change', function() {
 });
 document.getElementById('check_out').addEventListener('change', function() {});
 
-function filterRooms() { loadRooms(); }
+function filterRooms() {
+    loadRooms();
+    setTimeout(function() {
+        var roomsSection = document.querySelector('.rooms-section');
+        if (roomsSection) roomsSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 150);
+}
 
 function loadRooms() {
     var cin  = document.getElementById('check_in').value;
@@ -738,5 +760,18 @@ function hideError() { document.getElementById('pay-error').classList.remove('vi
 function formatDate(str) {
     return new Date(str+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
 }
+
+// ── Scroll reveal observer ──
+document.addEventListener('DOMContentLoaded', function() {
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(function(el){ observer.observe(el); });
+});
 </script>
 @endpush
