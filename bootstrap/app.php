@@ -26,6 +26,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => \App\Http\Middleware\EnsureUserIsActive::class,
             'role'   => \App\Http\Middleware\EnsureRole::class,
         ]);
+
+        // Stripe webhook must bypass CSRF (verified by Stripe signature instead)
+        $middleware->validateCsrfTokens(except: [
+            'payments/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
