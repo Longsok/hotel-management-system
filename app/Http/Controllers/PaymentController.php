@@ -14,7 +14,10 @@ class PaymentController extends Controller
 {
     public function __construct()
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        $secret = config('services.stripe.secret');
+        if (!empty($secret)) {
+            Stripe::setApiKey($secret);
+        }
     }
 
     // GET /payments
@@ -181,11 +184,21 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Webhook signature verification failed.'], 400);
         }
 
-        match ($event->type) {
-            'payment_intent.succeeded'      => $this->handlePaymentSuccess($event->data->object),
-            'payment_intent.payment_failed' => $this->handlePaymentFailed($event->data->object),
-            default => null,
-        };
+        try {
+            match ($event->type) {
+                'payment_intent.succeeded'      => $this->handlePaymentSuccess($event->data->object),
+                'payment_intent.payment_failed' => $this->handlePaymentFailed($event->data->object),
+                default => null,
+            };
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Stripe webhook handler failed', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+            // Still return 200 so Stripe stops retrying; we've logged the cause
+            return response()->json(['received' => true, 'note' => 'handler error logged']);
+        }
 
         return response()->json(['received' => true]);
     }
