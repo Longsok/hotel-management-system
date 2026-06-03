@@ -46,10 +46,14 @@ Route::get('/', fn() => redirect()->route('guest.booking'));
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-// Stripe webhook – bypasses CSRF, verified by Stripe signature
+// Stripe webhook – bypasses CSRF + session (verified by Stripe signature)
+// Skipping StartSession prevents DB session-lock timeouts on the single-threaded server.
 Route::post('/payments/webhook', [PaymentController::class, 'webhook'])
     ->name('payments.webhook')
-    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    ]);
 
 /*
 |--------------------------------------------------------------------------

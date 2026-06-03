@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         |----------------------------------------------------------------------
         |
         |  'active'  — blocks deactivated accounts from using a live session.
-        |              Applied to every protected group.
+        |              Applied to every protected group
         |
         |  'role'    — gates by role(s), e.g. middleware('role:admin')
         |
